@@ -267,8 +267,7 @@ calc (PSG * psg)
     if (psg->mask&PSG_MASK_CH(i))
       continue;
 
-    if ((psg->freq[i]==0&&psg->noise_freq==0) || 
-        ((psg->tmask[i] || psg->edge[i]) && (psg->nmask[i] || noise)))
+    if ((psg->tmask[i]||psg->edge[i]) && (psg->nmask[i]||noise))
     {
       if (!(psg->volume[i] & 32))
         mix += psg->voltbl[psg->volume[i] & 31];

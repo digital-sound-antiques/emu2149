@@ -62,6 +62,9 @@ extern "C"
     /* I/O Ctrl */
     uint32_t adr;
 
+    /* output of channels */
+    int16_t ch_out[3];
+
   } PSG;
 
   void PSG_set_quality (PSG * psg, uint32_t q);

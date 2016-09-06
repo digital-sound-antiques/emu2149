@@ -1,6 +1,6 @@
 /****************************************************************************
 
-  emu2149.c -- YM2149/AY-3-8910 emulator by Mitsutaka Okazaki 2001
+  emu2149.c -- YM2149/AY-3-8910 emulator by Mitsutaka Okazaki 2001-2016
 
   2001 04-28 : Version 1.00beta -- 1st Beta Release.
   2001 08-14 : Version 1.10
@@ -8,9 +8,10 @@
   2002 03-02 : Version 1.12     -- Removed PSG_init & PSG_close.
   2002 10-13 : Version 1.14     -- Fixed the envelope unit.
   2003 09-19 : Version 1.15     -- Added PSG_setMask and PSG_toggleMask
-  2004 01-11 : Version 1.16     -- Fixed an envelope problem where the envelope 
+  2004 01-11 : Version 1.16     -- Fixed the envelope problem where the envelope 
                                    frequency register is written before key-on.
   2015 12-13 : Version 1.17     -- Changed own integer types to C99 stdint.h types.
+  2016 09-06 : Version 1.20     -- Support per-channel output.
 
   References:
     psg.vhd        -- 2000 written by Kazuhiro Tsujikawa.
@@ -145,6 +146,7 @@ PSG_reset (PSG * psg)
     psg->freq[i] = 0;
     psg->edge[i] = 0;
     psg->volume[i] = 0;
+    psg->ch_out[i] = 0;
   }
 
   psg->mask = 0;
@@ -164,6 +166,7 @@ PSG_reset (PSG * psg)
   psg->env_pause = 1;
 
   psg->out = 0;
+
 }
 
 void
@@ -194,13 +197,12 @@ PSG_writeIO (PSG * psg, uint32_t adr, uint32_t val)
     psg->adr = val & 0x1f;
 }
 
-static inline int16_t
-calc (PSG * psg)
+static inline void
+update_output (PSG * psg)
 {
 
   int i, noise;
   uint32_t incr;
-  int32_t mix = 0;
 
   psg->base_count += psg->base_incr;
   incr = (psg->base_count >> GETA_BITS);
@@ -269,34 +271,40 @@ calc (PSG * psg)
 
     if ((psg->tmask[i]||psg->edge[i]) && (psg->nmask[i]||noise))
     {
-      if (!(psg->volume[i] & 32))
-        mix += psg->voltbl[psg->volume[i] & 31];
-      else
-        mix += psg->voltbl[psg->env_ptr];
+      if (!(psg->volume[i] & 32)) 
+        psg->ch_out[i] += (psg->voltbl[psg->volume[i] & 31] << 4);
+      else 
+        psg->ch_out[i] += (psg->voltbl[psg->env_ptr] << 4);
     }
+
+    psg->ch_out[i] >>= 1;
 
   }
 
-  return (int16_t) mix;
+}
+
+static inline int16_t 
+mix_output(PSG *psg) {
+  return (int16_t)(psg->out = psg->ch_out[0] + psg->ch_out[1] + psg->ch_out[2]);
 }
 
 int16_t
 PSG_calc (PSG * psg)
 {
-  if (!psg->quality)
-    return (int16_t) (calc (psg) << 4);
+  if (!psg->quality) {
+    update_output(psg);
+    return mix_output(psg);
+  }
 
   /* Simple rate converter */
   while (psg->realstep > psg->psgtime)
   {
     psg->psgtime += psg->psgstep;
-    psg->out += calc (psg);
-    psg->out >>= 1;
+    update_output(psg);
   }
-
   psg->psgtime = psg->psgtime - psg->realstep;
 
-  return (int16_t) (psg->out << 4);
+  return mix_output(psg);
 }
 
 void
@@ -338,9 +346,8 @@ PSG_writeReg (PSG * psg, uint32_t reg, uint32_t val)
   case 9:
   case 10:
     psg->volume[reg - 8] = val << 1;
-
     break;
-
+ 
   case 11:
   case 12:
     psg->env_freq = (psg->reg[12] << 8) + psg->reg[11];

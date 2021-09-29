@@ -210,7 +210,7 @@ update_output (PSG * psg)
 
   /* Envelope */
   psg->env_count += incr;
-  while (psg->env_count>=0x10000 && psg->env_freq!=0)
+  while (psg->env_count>=0x10000)
   {
     if (!psg->env_pause)
     {
@@ -235,7 +235,7 @@ update_output (PSG * psg)
       }
     }
 
-    psg->env_count -= psg->env_freq;
+    psg->env_count -= psg->env_freq?psg->env_freq:1; /* env_freq 0 is the same as 1. */
   }
 
   /* Noise */

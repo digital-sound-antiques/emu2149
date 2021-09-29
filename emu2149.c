@@ -12,6 +12,7 @@
                                    frequency register is written before key-on.
   2015 12-13 : Version 1.17     -- Changed own integer types to C99 stdint.h types.
   2016 09-06 : Version 1.20     -- Support per-channel output.
+  2021 09-29 : Version 1.30     -- Fix some envelope generator problems (issue #2).
 
   References:
     psg.vhd        -- 2000 written by Kazuhiro Tsujikawa.
@@ -351,6 +352,7 @@ PSG_writeReg (PSG * psg, uint32_t reg, uint32_t val)
   case 11:
   case 12:
     psg->env_freq = (psg->reg[12] << 8) + psg->reg[11];
+    psg->env_count = 0x10000 - psg->env_freq;
     break;
 
   case 13:

@@ -47,6 +47,7 @@ extern "C"
     uint32_t env_count;
 
     uint32_t noise_seed;
+    uint8_t noise_scaler;
     uint8_t noise_count;
     uint8_t noise_freq;
 

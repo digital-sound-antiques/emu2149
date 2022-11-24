@@ -185,6 +185,7 @@ PSG_reset (PSG * psg)
   psg->adr = 0;
 
   psg->noise_seed = 0xffff;
+  psg->noise_scaler = 0;
   psg->noise_count = 0;
   psg->noise_freq = 0;
 
@@ -273,9 +274,13 @@ update_output (PSG * psg)
   psg->noise_count += incr;
   if (psg->noise_count >= psg->noise_freq)
   {
-    if (psg->noise_seed & 1)
-      psg->noise_seed ^= 0x24000;
-    psg->noise_seed >>= 1;
+    psg->noise_scaler ^= 1;
+    if (psg->noise_scaler) 
+    { 
+      if (psg->noise_seed & 1)
+        psg->noise_seed ^= 0x24000;
+      psg->noise_seed >>= 1;
+    }
     
     if (psg->noise_freq >= incr)
       psg->noise_count -= psg->noise_freq;
@@ -376,7 +381,7 @@ PSG_writeReg (PSG * psg, uint32_t reg, uint32_t val)
     break;
 
   case 6:
-    psg->noise_freq = (val & 31) << 1;
+    psg->noise_freq = val & 31;
     break;
 
   case 7:

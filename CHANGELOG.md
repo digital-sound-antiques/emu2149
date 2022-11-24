@@ -1,7 +1,8 @@
-## 2022-XX-XX : v1.40
+## 2022-11-25 : v1.40
 Breaking Change: ym2149's internal clock divider is disabled by default.
 Use PSG_setClockDivider to enable clock divider.
 
+- Adopt Semantics Versioning.
 - Fix the bug with the changing period register faster than frequency (issue #3).
 - Fix the confusing PSG_setVolumeMode type argument.
 - Rename PSG_set_rate to PSG_setRate.

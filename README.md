@@ -3,6 +3,22 @@ emu2149
 
 A YM2149 (aka PSG) emulator written in C.
 
+# Breaking Change on v1.40
+- Internal clock divider is disabled by default. Use `PSG_setClockDivider(psg, 1)` to enable clock divider.
+
+```
+/* Typical YM2149 configuration */
+PSG *psg = PSG_new(3579545, 44100);
+PSG_setClockDivider(psg, 1);
+PSG_setVolumeMode(psg, 1); // YM style
+PSG_reset();
+
+/* Typical AY-3-8910 configuration */
+PSG *psg = PSG_new(3579545/2, 44100);
+PSG_setVolumeMode(psg, 2); // AY style
+PSG_reset();
+```
+
 # Note for rate conversion
 
 The internal sample rate converter in emu2149 is a light-weight, simplified procedure.

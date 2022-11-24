@@ -1,4 +1,4 @@
-## 2022-10-16 : v1.40
+## 2022-XX-XX : v1.40
 Breaking Change: ym2149's internal clock divider is disabled by default.
 Use PSG_setClockDivider to enable clock divider.
 
@@ -8,6 +8,7 @@ Use PSG_setClockDivider to enable clock divider.
 - Rename PSG_set_quality to PSG_setQuality.
 - Restore PSG_setClock that was removed on v1.20 for compatibility.
 - Add PSG_setClockDivider function.
+- Fix noise period at zero frequency.
 
 ## 2021-09-29 : v1.30
 - Fix some envelope generator problems (issue #2).

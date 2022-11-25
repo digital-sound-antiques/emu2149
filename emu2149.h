@@ -24,7 +24,7 @@ extern "C"
     uint8_t quality;
     uint8_t clk_div;
 
-    uint32_t count[3];
+    uint16_t count[3];
     uint8_t volume[3];
     uint16_t freq[3];
     uint8_t edge[3];

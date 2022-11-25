@@ -1,5 +1,5 @@
 /**
- * emu2149 v1.40
+ * emu2149 v1.41
  * https://github.com/digital-sound-antiques/emu2149
  * Copyright (C) 2001-2022 Mitsutaka Okazaki
  *
@@ -46,21 +46,14 @@ internal_refresh (PSG * psg)
   if (psg->quality)
   {
     psg->base_incr = 1 << GETA_BITS;
-    psg->realstep = (f_master / 8);
-    psg->psgstep = psg->rate;
+    psg->realstep = f_master;
+    psg->psgstep = psg->rate * 8;
     psg->psgtime = 0;
+    psg->freq_limit = (uint32_t)(f_master / 16 / (psg->rate / 2));
   }
   else
   {
-    psg->base_incr =
-      (uint32_t)((double)f_master * (1 << GETA_BITS) / 8 / psg->rate);
-  }
-
-  /* freq_limit is the lower boundary of the freqency register value that generates 
-   * a pitch higher than the Nyquist frequency of the given sample rate. */
-  psg->freq_limit = (uint32_t)(f_master / 16 / (psg->rate / 2)); 
-  if (psg->freq_limit == 1) {
-    /* freq_limit is disabled if the sample rate is higher than f_master/8. */
+    psg->base_incr = (uint32_t)((double)f_master * (1 << GETA_BITS) / 8 / psg->rate);
     psg->freq_limit = 0;
   }
 }
@@ -303,16 +296,20 @@ update_output (PSG * psg)
         psg->count[i] = 0;
     }
 
-    if (0 < psg->freq_limit && psg->freq[i] <= psg->freq_limit) {
+    if (0 < psg->freq_limit && psg->freq[i] <= psg->freq_limit) 
+    {
       /* Mute the channel if the pitch is higher than the Nyquist frequency at the current sample rate, 
        * to prevent aliased or broken tones from being generated. Of course, this logic doesn't exist 
        * on the actual chip, but practically all tones higher than the Nyquist frequency are usually 
-       * removed by a low-pass circuit somewhere, so we here mute them. */
+       * removed by a low-pass circuit somewhere, so we here halt the output. */
       continue;
     }
 
-    if (psg->mask&PSG_MASK_CH(i))
+    if (psg->mask & PSG_MASK_CH(i)) 
+    {
+      psg->ch_out[i] = 0;
       continue;
+    }
 
     if ((psg->tmask[i]||psg->edge[i]) && (psg->nmask[i]||noise))
     {
@@ -329,7 +326,8 @@ update_output (PSG * psg)
 }
 
 static inline int16_t 
-mix_output(PSG *psg) {
+mix_output(PSG *psg) 
+{
   return (int16_t)(psg->ch_out[0] + psg->ch_out[1] + psg->ch_out[2]);
 }
 
@@ -353,7 +351,6 @@ PSG_calc (PSG * psg)
     }
     psg->psgtime -= psg->realstep;
   }
-
   return psg->out;
 }
 

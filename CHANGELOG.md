@@ -1,3 +1,7 @@
+## 2022-11-26 : v1.41
+- Fix a problem with DC offset when muting a channel (issue #4).
+- Disable frequency limiter if the internal rate converter is not active (i.e. quality == 0).
+
 ## 2022-11-25 : v1.40
 Breaking Change: ym2149's internal clock divider is disabled by default.
 Use PSG_setClockDivider to enable clock divider.

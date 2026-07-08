@@ -419,3 +419,13 @@ PSG_writeReg (PSG * psg, uint32_t reg, uint32_t val)
 
   return;
 }
+
+int PSG_save_state(PSG *psg, uint8_t *out) {
+  if (out) memcpy(out, psg, sizeof(PSG));
+  return (int)sizeof(PSG);
+}
+void PSG_load_state(PSG *psg, const uint8_t *in, int size) {
+  /* voltbl is the only pointer and targets a static table (same address in every
+     instance), so a plain copy is position-independent (restorable cross-instance). */
+  if (size >= (int)sizeof(PSG)) memcpy(psg, in, sizeof(PSG));
+}

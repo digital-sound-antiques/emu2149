@@ -1,5 +1,5 @@
 /**
- * emu2149 v1.42
+ * emu2149 v1.43
  * https://github.com/digital-sound-antiques/emu2149
  * Copyright (C) 2001-2022 Mitsutaka Okazaki
  *
@@ -169,6 +169,8 @@ PSG_reset (PSG * psg)
     psg->edge[i] = 0;
     psg->volume[i] = 0;
     psg->ch_out[i] = 0;
+    psg->tmask[i] = 0;
+    psg->nmask[i] = 0;
   }
 
   psg->mask = 0;
@@ -182,10 +184,17 @@ PSG_reset (PSG * psg)
   psg->noise_count = 0;
   psg->noise_freq = 0;
 
+  psg->env_continue = 0;
+  psg->env_attack = 0;
+  psg->env_alternate = 0;
+  psg->env_hold = 0;
+  psg->env_face = 0;
   psg->env_ptr = 0;
   psg->env_freq = 0;
   psg->env_count = 0;
   psg->env_pause = 1;
+
+  psg->psgtime = 0;
 
   psg->out = 0;
 

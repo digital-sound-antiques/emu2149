@@ -1,3 +1,7 @@
+## 2026-07-22 : v1.43
+- Fixed reset function to fully clear runtime state.
+- Added save/load state functionality.
+
 ## 2024-08-28 : v1.42
 - Fix the problem where white noise is not generated if tone frequency is set higher than internal limit (issue #5). Thanks to Norix-san.
 
